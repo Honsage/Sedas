@@ -14,6 +14,10 @@ INSTALLED_APPS = [
     'drf_yasg',
     # project apps
     'apps.users',
+    "apps.documents",
+    "apps.workflows",
+    "apps.signatures",
+    "apps.audit",
 ]
 
 MIDDLEWARE = [
