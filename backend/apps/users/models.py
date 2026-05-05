@@ -86,3 +86,19 @@ class UserRole(models.Model):
     class Meta:
         db_table = "users_user_role"
         unique_together = [("user", "role")]
+
+
+class PublicKey(models.Model):
+    """Публичный ключ пользователя для верификации ЭЦП"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="public_keys")
+    public_key = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "users_public_key"
+        verbose_name = "Публичный ключ"
+        verbose_name_plural = "Публичные ключи"
+
+    def __str__(self):
+        return f"Key #{self.pk} — {self.user.email}"
