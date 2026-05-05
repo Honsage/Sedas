@@ -64,6 +64,8 @@ class Role(models.Model):
     """Бизнес-роль в системе"""
 
     ADMINISTRATOR = "Администратор"
+    SIGNER = "Подписант"
+    EMPLOYEE = "Сотрудник"
 
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
