@@ -5,23 +5,32 @@ from django.db import models
 class AuditLog(models.Model):
     """
     Полиморфный журнал действий. FK на target намеренно отсутствует —
-    запись сохраняется даже после удаления целевого объекта.
+    запись сохраняется даже после удаления целевого объекта
     """
 
     class ActionType(models.TextChoices):
+        # Пользователи
+        CREATE_USER = "create_user", "Создание пользователя"
+        DEACTIVATE_USER = "deactivate_user", "Деактивация пользователя"
+        ASSIGN_ROLE = "assign_role", "Назначение роли"
+        REMOVE_ROLE = "remove_role", "Снятие роли"
+        # Документы
         CREATE_DOCUMENT = "create_document", "Создание документа"
         UPDATE_DOCUMENT = "update_document", "Обновление документа"
+        ADD_VERSION = "add_version", "Добавление версии"
         SUBMIT_FOR_REVIEW = "submit_for_review", "Отправка на согласование"
+        RETURN_FOR_REVISION = "return_for_revision", "Возврат на доработку"
+        ARCHIVE_DOCUMENT = "archive_document", "Архивация документа"
+        # Согласование
+        START_WORKFLOW = "start_workflow", "Запуск маршрута"
         APPROVE_STEP = "approve_step", "Одобрение шага"
         REJECT_STEP = "reject_step", "Отклонение шага"
-        RETURN_FOR_REVISION = "return_for_revision", "Возврат на доработку"
+        # ЭЦП
         SIGN_DOCUMENT = "sign_document", "Подписание документа"
-        ARCHIVE_DOCUMENT = "archive_document", "Архивация документа"
-        START_WORKFLOW = "start_workflow", "Запуск маршрута"
-        ADD_VERSION = "add_version", "Добавление версии"
         REGISTER_KEY = "register_key", "Регистрация публичного ключа"
 
     class TargetType(models.TextChoices):
+        USER = "User", "Пользователь"
         DOCUMENT = "Document", "Документ"
         DOCUMENT_VERSION = "DocumentVersion", "Версия документа"
         WORKFLOW = "Workflow", "Маршрут"
