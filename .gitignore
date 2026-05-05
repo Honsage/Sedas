@@ -1,6 +1,13 @@
-venv
+# Dependencies
+venv/
+
+# Test data
 *.sqlite3
 
+# Environment and secrets
 .env
 
+# IDEs
+.vscode/
 .idea/
+
