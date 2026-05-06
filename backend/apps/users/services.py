@@ -4,6 +4,7 @@ from .models import Role, User, UserRole
 
 
 def create_user(validated_data: dict, created_by: User) -> User:
+    """Создаёт нового пользователя и записывает событие в аудит"""
     role_ids = validated_data.pop("role_ids", [])
     password = validated_data.pop("password")
 
@@ -25,6 +26,7 @@ def create_user(validated_data: dict, created_by: User) -> User:
 
 
 def assign_role(user: User, role: Role, assigned_by: User) -> None:
+    """Назначает роль пользователю и записывает событие в аудит"""
     _, created = UserRole.objects.get_or_create(user=user, role=role)
     if created:
         AuditLog.objects.create(
@@ -36,6 +38,7 @@ def assign_role(user: User, role: Role, assigned_by: User) -> None:
 
 
 def remove_role(user: User, role: Role, removed_by: User) -> None:
+    """Снимает роль с пользователя и записывает событие в аудит"""
     deleted, _ = UserRole.objects.filter(user=user, role=role).delete()
     if deleted:
         AuditLog.objects.create(
@@ -47,6 +50,7 @@ def remove_role(user: User, role: Role, removed_by: User) -> None:
 
 
 def deactivate_user(user: User, deactivated_by: User) -> None:
+    """Деактивирует учётную запись пользователя и записывает событие в аудит"""
     user.is_active = False
     user.save(update_fields=["is_active"])
     AuditLog.objects.create(
