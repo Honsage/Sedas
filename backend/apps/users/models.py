@@ -3,19 +3,25 @@ from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, full_name, password=None, **kwargs):
+    def create_user(self, email, name, surname, password=None, patronymic='', **kwargs):
         if not email:
             raise ValueError("Поле Email обязательно для идентификации пользователя")
         email = self.normalize_email(email)
-        user = self.model(email=email, full_name=full_name, **kwargs)
+        user = self.model(
+            email=email,
+            name=name,
+            surname=surname,
+            patronymic=patronymic,
+            **kwargs
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, full_name, password=None, **kwargs):
+    def create_superuser(self, email, name, surname, password=None, **kwargs):
         kwargs.setdefault("is_staff", True)
         kwargs.setdefault("is_superuser", True)
-        return self.create_user(email, full_name, password, **kwargs)
+        return self.create_user(email, name, surname, password, **kwargs)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -87,6 +93,8 @@ class UserRole(models.Model):
 
     class Meta:
         db_table = "users_user_role"
+        verbose_name = "Соответствие Пользователь-Роль"
+        verbose_name_plural = "Соответствия Пользователь-Роль"
         unique_together = [("user", "role")]
 
 
