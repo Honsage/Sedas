@@ -1,6 +1,6 @@
 from apps.audit.models import AuditLog
 
-from .models import Role, User, UserRole
+from .models import Role, User, UserRole, PublicKey
 
 
 def create_user(validated_data: dict, created_by: User) -> User:
@@ -59,3 +59,16 @@ def deactivate_user(user: User, deactivated_by: User) -> None:
         target_type=AuditLog.TargetType.USER,
         target_id=user.pk,
     )
+
+
+def register_public_key(user: User, public_key_pem: str, actor: User) -> PublicKey:
+    """Сохраняет публичный ключ пользователя и записывает событие в аудит"""
+    key = PublicKey.objects.create(user=user, public_key=public_key_pem)
+    AuditLog.objects.create(
+        user=actor,
+        action_type=AuditLog.ActionType.REGISTER_KEY,
+        target_type=AuditLog.TargetType.PUBLIC_KEY,
+        target_id=key.pk,
+    )
+    return key
+
