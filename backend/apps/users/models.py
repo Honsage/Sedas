@@ -3,25 +3,19 @@ from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, name, surname, password=None, patronymic='', **kwargs):
+    def create_user(self, email, password=None, **kwargs):
         if not email:
             raise ValueError("Поле Email обязательно для идентификации пользователя")
         email = self.normalize_email(email)
-        user = self.model(
-            email=email,
-            name=name,
-            surname=surname,
-            patronymic=patronymic,
-            **kwargs
-        )
+        user = self.model(email=email, **kwargs)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, surname, password=None, **kwargs):
+    def create_superuser(self, email, password=None, **kwargs):
         kwargs.setdefault("is_staff", True)
         kwargs.setdefault("is_superuser", True)
-        return self.create_user(email, name, surname, password, **kwargs)
+        return self.create_user(email, password, **kwargs)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
