@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/v1/", include("apps.users.urls")),
     path("api/v1/", include("apps.documents.urls")),
     path("api/v1/", include("apps.workflows.urls")),
+    path("api/v1/", include("apps.signatures.urls")),
 ]
 
 if settings.DEBUG:
