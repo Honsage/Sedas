@@ -16,6 +16,7 @@ urlpatterns = [
     # Apps
     path("api/v1/", include("apps.users.urls")),
     path("api/v1/", include("apps.documents.urls")),
+    path("api/v1/", include("apps.workflows.urls")),
 ]
 
 if settings.DEBUG:
