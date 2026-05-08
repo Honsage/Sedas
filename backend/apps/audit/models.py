@@ -23,6 +23,7 @@ class AuditLog(models.Model):
         ARCHIVE_DOCUMENT = "archive_document", "Архивация документа"
         # Согласование
         START_WORKFLOW = "start_workflow", "Запуск маршрута"
+        ASSIGN_STEP = "assign_step", "Назначение на шаг"
         APPROVE_STEP = "approve_step", "Одобрение шага"
         REJECT_STEP = "reject_step", "Отклонение шага"
         # ЭЦП
