@@ -6,9 +6,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from . import services
-from .models import Role, User
-from .permissions import IsAdministrator
-from .serializers import RoleSerializer, UserCreateSerializer, UserSerializer, UserUpdateSerializer
+from .models import PublicKey, Role, User
+from .permissions import IsAdministrator, IsEmployee
+from .serializers import PublicKeySerializer, RoleSerializer, UserCreateSerializer, UserSerializer, UserUpdateSerializer
 
 
 class LoginView(TokenObtainPairView):
@@ -90,3 +90,38 @@ class RoleViewSet(viewsets.ModelViewSet):
         if self.action in ("create", "update", "partial_update", "destroy"):
             return [IsAdministrator()]
         return super().get_permissions()
+
+
+class PublicKeyListView(APIView):
+    """Представление для просмотра и добавления публичных ключей текущего пользователя"""
+
+    permission_classes = [IsEmployee]
+
+    def get(self, request):
+        """Возвращает список публичных ключей текущего пользователя"""
+        keys = request.user.public_keys.all()
+        return Response(PublicKeySerializer(keys, many=True).data)
+
+    def post(self, request):
+        """Регистрирует новый публичный ключ для текущего пользователя"""
+        serializer = PublicKeySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        key = services.register_public_key(
+            user=request.user,
+            public_key_pem=serializer.validated_data["public_key"],
+            actor=request.user,
+        )
+        return Response(PublicKeySerializer(key).data, status=status.HTTP_201_CREATED)
+
+
+class PublicKeyDetailView(APIView):
+    """Представление для удаления публичного ключа"""
+
+    permission_classes = [IsEmployee]
+
+    def delete(self, request, key_pk):
+        """Удаляет публичный ключ текущего пользователя"""
+        key = get_object_or_404(PublicKey, pk=key_pk, user=request.user)
+        key.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
