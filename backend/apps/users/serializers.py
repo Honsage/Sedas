@@ -30,7 +30,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     """Сериализатор на создание пользователя"""
 
     # patronymic необязателен при создании
-    patronymic = serializers.CharField(max_length=32, required=False, default="")
+    patronymic = serializers.CharField(max_length=32, required=False, default="", allow_blank=True)
     # password принимается при создании, но никогда не возвращается
     password = serializers.CharField(min_length=8, write_only=True)
     role_ids = serializers.ListField(
