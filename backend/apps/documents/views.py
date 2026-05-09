@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -17,6 +19,23 @@ from .serializers import (
     DocumentVersionCreateSerializer,
     DocumentVersionSerializer,
 )
+
+_TAG_DOCS = ["Документы"]
+_TAG_VERSIONS = ["Версии документов"]
+
+_RESP_400 = openapi.Response("Ошибка валидации / неверный статус", schema=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)},
+))
+_RESP_403 = openapi.Response("Доступ запрещён", schema=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)},
+))
+_RESP_404 = openapi.Response("Не найдено", schema=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={"detail": openapi.Schema(type=openapi.TYPE_STRING)},
+))
+_RESP_204 = openapi.Response("Нет содержимого")
 
 
 def _get_user_documents_queryset(user):
@@ -46,12 +65,23 @@ class DocumentViewSet(viewsets.ViewSet):
 
     permission_classes = [IsEmployee]
 
+    @swagger_auto_schema(
+        tags=_TAG_DOCS,
+        operation_summary="Список документов",
+        operation_description="Возвращает только документы, к которым у пользователя есть доступ",
+        responses={200: DocumentSerializer(many=True)},
+    )
     def list(self, request):
         """Возвращает список документов, доступных текущему пользователю"""
         queryset = _get_user_documents_queryset(request.user)
         serializer = DocumentSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        tags=_TAG_DOCS,
+        operation_summary="Документ",
+        responses={200: DocumentSerializer, 403: _RESP_403, 404: _RESP_404},
+    )
     def retrieve(self, request, pk=None):
         """Возвращает детальную информацию о документе"""
         document = get_object_or_404(Document, pk=pk)
@@ -59,6 +89,13 @@ class DocumentViewSet(viewsets.ViewSet):
         serializer = DocumentSerializer(document)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        tags=_TAG_DOCS,
+        operation_summary="Создать документ",
+        operation_description="Создаёт документ и первую версию файла. Вычисляет SHA-256 хеш файла",
+        request_body=DocumentCreateSerializer,
+        responses={201: DocumentSerializer, 400: _RESP_400},
+    )
     def create(self, request):
         """Создаёт новый документ с первой версией"""
         serializer = DocumentCreateSerializer(data=request.data)
@@ -80,6 +117,13 @@ class DocumentUpdateView(APIView):
 
     permission_classes = [IsEmployee]
 
+    @swagger_auto_schema(
+        tags=_TAG_DOCS,
+        operation_summary="Обновить метаданные документа",
+        operation_description="Обновляет title и description. Документ должен быть в статусе draft",
+        request_body=DocumentUpdateSerializer,
+        responses={200: DocumentSerializer, 400: _RESP_400, 403: _RESP_403, 404: _RESP_404},
+    )
     def patch(self, request, pk):
         """Обновляет title и description черновика документа"""
         document = get_object_or_404(Document, pk=pk)
@@ -104,6 +148,11 @@ class DocumentVersionViewSet(viewsets.ViewSet):
 
     permission_classes = [IsEmployee]
 
+    @swagger_auto_schema(
+        tags=_TAG_VERSIONS,
+        operation_summary="Список версий документа",
+        responses={200: DocumentVersionSerializer(many=True), 403: _RESP_403, 404: _RESP_404},
+    )
     def list(self, request, document_pk=None):
         """Возвращает все версии указанного документа"""
         document = get_object_or_404(Document, pk=document_pk)
@@ -113,6 +162,13 @@ class DocumentVersionViewSet(viewsets.ViewSet):
         serializer = DocumentVersionSerializer(versions, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        tags=_TAG_VERSIONS,
+        operation_summary="Добавить версию документа",
+        operation_description="Загружает новый файл и создаёт следующую версию. Вычисляет SHA-256 хеш",
+        request_body=DocumentVersionCreateSerializer,
+        responses={201: DocumentVersionSerializer, 400: _RESP_400, 403: _RESP_403, 404: _RESP_404},
+    )
     def create(self, request, document_pk=None):
         """Добавляет новую версию к существующему документу"""
         document = get_object_or_404(Document, pk=document_pk)
@@ -135,6 +191,13 @@ class DocumentSubmitForReviewView(APIView):
 
     permission_classes = [IsEmployee]
 
+    @swagger_auto_schema(
+        tags=_TAG_DOCS,
+        operation_summary="Отправить на согласование",
+        operation_description="Переводит документ из статуса `draft` → `under_review`",
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT),
+        responses={200: DocumentSerializer, 400: _RESP_400, 403: _RESP_403, 404: _RESP_404},
+    )
     def post(self, request, pk):
         """Переводит документ из статуса 'Черновик' в 'На согласовании'"""
         document = get_object_or_404(Document, pk=pk)
@@ -153,6 +216,13 @@ class DocumentArchiveView(APIView):
 
     permission_classes = [IsEmployee]
 
+    @swagger_auto_schema(
+        tags=_TAG_DOCS,
+        operation_summary="Архивировать документ",
+        operation_description="Переводит документ из статуса `signed` в `archived`",
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT),
+        responses={200: DocumentSerializer, 400: _RESP_400, 403: _RESP_403, 404: _RESP_404},
+    )
     def post(self, request, pk):
         """Переводит документ из статуса 'Подписан' в 'Архив'"""
         document = get_object_or_404(Document, pk=pk)
