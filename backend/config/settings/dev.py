@@ -19,6 +19,12 @@ DATABASES = {
     }
 }
 
+# CSRF
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1"
+]
+
 if ALLOWED_HOSTS:
     for host in ALLOWED_HOSTS:
         if isinstance(host, str) and not host.startswith("http"):

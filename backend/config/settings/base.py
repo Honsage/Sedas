@@ -79,12 +79,6 @@ STATIC_ROOT = '/staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/media'
 
-# CSRF
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost",
-    "http://127.0.0.1",
-]
-
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
