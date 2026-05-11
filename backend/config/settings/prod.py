@@ -19,6 +19,12 @@ DATABASES = {
     }
 }
 
+if ALLOWED_HOSTS:
+    for host in ALLOWED_HOSTS:
+        if isinstance(host, str) and not host.startswith("http"):
+            CSRF_TRUSTED_ORIGINS.append(f"http://{host}")
+            CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
+
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
