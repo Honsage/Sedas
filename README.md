@@ -60,7 +60,19 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
+Admin credentials are specified in .env.
+
 ### 2. Local Development
+
+Run the Postgres database on the `5432` port with connection parameters (db-name, user, password) from your .env file.
+
+E.g. using docker:
+```bash
+docker run --name sedas-db -e POSTGRES_DB=sedas -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16-alpine
+```
+
+Then activate python virtual environment, install dependencies, migrate the db, create superuser (admin) and run the dev server.
+
 ```bash
 python -m venv venv
 source venv/bin/activate    # Windows: venv\Scripts\activate
@@ -136,6 +148,16 @@ Sedas/
     │   └── audit/
     ├── infrastructure/         # Crypto utilities and shared code
     └── tests/
+```
+
+---
+
+## Tests
+
+Run `django-pytest` tests with:
+
+```bash
+pytest tests/
 ```
 
 ---
